@@ -1,0 +1,41 @@
+name: snipdash
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: snipdash-dev
+    working_dir: /workspace
+    # Keep an interactive shell alive: `docker compose exec dev bash`.
+    stdin_open: true
+    tty: true
+    command: bash
+    ports:
+      - "1420:1420" # Vite dev server — open http://localhost:1420 on the host
+    environment:
+      CARGO_TARGET_DIR: /workspace/target
+      # --- Native window via X11 (Linux host only; see docs/docker.md) ---
+      # DISPLAY: ${DISPLAY}
+      # WEBKIT_DISABLE_COMPOSITING_MODE: "1"
+      # LIBGL_ALWAYS_SOFTWARE: "1"
+    volumes:
+      - .:/workspace:cached
+      # Keep native/heavy directories inside the container so they neither
+      # collide with the host OS nor slow down bind-mount IO:
+      - node_modules:/workspace/node_modules
+      - desktop_node_modules:/workspace/apps/desktop/node_modules
+      - sdk_node_modules:/workspace/packages/snipdash-sdk/node_modules
+      - cargo_target:/workspace/target
+      - cargo_registry:/usr/local/cargo/registry
+      - cargo_git:/usr/local/cargo/git
+      # --- Native window via X11 (Linux host only) ---
+      # - /tmp/.X11-unix:/tmp/.X11-unix:rw
+
+volumes:
+  node_modules:
+  desktop_node_modules:
+  sdk_node_modules:
+  cargo_target:
+  cargo_registry:
+  cargo_git:

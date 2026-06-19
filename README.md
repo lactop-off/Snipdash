@@ -62,6 +62,8 @@ snipdash/
 pnpm install
 ```
 
+> 🐳 **Docker で開発したい場合** は [`docs/docker.md`](docs/docker.md) を参照してください。テスト・型チェック・ブラウザでの UI 開発・Linux 配布物ビルドをコンテナ内で完結できます（`pnpm docker:build && pnpm docker:up && pnpm docker:sh`）。
+
 ### よく使うコマンド
 
 | コマンド | 内容 |

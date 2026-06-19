@@ -14,7 +14,11 @@
     "typecheck": "pnpm --filter @snipdash/sdk typecheck && pnpm --filter @snipdash/desktop typecheck",
     "test": "pnpm -r test",
     "test:core": "cargo test -p snipdash-core",
-    "tauri": "pnpm --filter @snipdash/desktop tauri"
+    "tauri": "pnpm --filter @snipdash/desktop tauri",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
+    "docker:sh": "docker compose exec dev bash",
+    "docker:down": "docker compose down"
   },
   "engines": {
     "node": ">=20"
