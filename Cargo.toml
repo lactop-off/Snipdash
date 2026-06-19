@@ -1,0 +1,28 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/snipdash-core",
+    "apps/desktop/src-tauri",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Snipdash contributors"]
+repository = "https://github.com/lactop-off/snipdash"
+rust-version = "1.77"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+thiserror = "2"
+snipdash-core = { path = "crates/snipdash-core" }
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

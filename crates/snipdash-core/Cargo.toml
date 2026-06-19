@@ -1,0 +1,22 @@
+[package]
+name = "snipdash-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Snipdash core: domain types, validation, serialization and migration. UI/IO-independent and reusable."
+
+[lib]
+name = "snipdash_core"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }

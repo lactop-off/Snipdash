@@ -1,0 +1,22 @@
+{
+  "name": "snipdash",
+  "version": "0.1.0",
+  "private": true,
+  "description": "自分で育てる、よく使う断片の作業ダッシュボード — ローカル保存・軽量・グリッド配置のスニペット/ランチャー/リッチカード",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "build:sdk": "pnpm --filter @snipdash/sdk build",
+    "test:sdk": "pnpm --filter @snipdash/sdk test",
+    "dev": "pnpm --filter @snipdash/desktop dev",
+    "build": "pnpm --filter @snipdash/sdk build && pnpm --filter @snipdash/desktop build",
+    "typecheck": "pnpm --filter @snipdash/sdk typecheck && pnpm --filter @snipdash/desktop typecheck",
+    "test": "pnpm -r test",
+    "test:core": "cargo test -p snipdash-core",
+    "tauri": "pnpm --filter @snipdash/desktop tauri"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
