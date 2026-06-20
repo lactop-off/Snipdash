@@ -63,7 +63,7 @@ Cards render through `CardFrame` → `TextCard`/`RichCard` (→ `MarkdownView`/`
 
 - Logic-layer changes (`snipdash-core` / `@snipdash/sdk`) must come with tests; data-format changes must come with a migration + tests.
 - Comments and identifiers are in English; user-facing strings are bilingual via `apps/desktop/src/i18n.ts` (`ja`/`en` dicts + `translator`). Add both locales for any new UI string.
-- The detailed product spec is `docs/spec.md`; Docker dev workflow is `docs/docker.md`.
+- The detailed product spec is `docs/仕様書.md`; Docker dev workflow is `docs/Docker開発環境.md`.
 - Icons come from Iconify (lucide): SVGs are downloaded into `apps/desktop/src/assets/icons/` and inlined via `apps/desktop/src/components/Icon.tsx` (they use `currentColor`). Don't hand-author icon SVGs or pull icons at runtime.
 
 ## Branch / PR workflow
@@ -76,7 +76,7 @@ Full rules in `CONTRIBUTING.md`. Key points (agents must follow these too):
 
 ## AI engineering team (subagents)
 
-This repo defines a 5-role AI team in `.claude/agents/` — `pm`, `designer`, `tech-lead`, `coder`, `qa` — driven through the phased process in `docs/ai-process.md`:
+This repo defines a 5-role AI team in `.claude/agents/` — `pm`, `designer`, `tech-lead`, `coder`, `qa` — driven through the phased process in `docs/AI開発プロセス.md`:
 
 要件定義(pm) → [human approval] → 基本設計(designer) → 設計レビュー(qa+tech-lead) → 詳細設計(tech-lead) → 実装(coder) → コードレビュー(qa) → テスト(qa, executed) → [human acceptance]
 

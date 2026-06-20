@@ -18,11 +18,11 @@ Snipdash を Claude Code のサブエージェント（`.claude/agents/`）で�
 
 ```
 [人間] 機能の依頼
-  → 要件定義 (pm)            → requirements.md（受け入れ基準/DoD を含む）
+  → 要件定義 (pm)            → 要件定義.md（受け入れ基準/DoD を含む）
   → [人間 承認ゲート ★]       ← 要件はここで人間が承認してから次へ
-  → 基本設計 (designer)       → design.md
+  → 基本設計 (designer)       → 基本設計.md
   → 設計レビュー (qa + tech-lead)   NG → 再設計(designer)  ←ループ
-  → 詳細設計 (tech-lead)      → tech-design.md（実現性 verdict 付き）
+  → 詳細設計 (tech-lead)      → 詳細設計.md（実現性 verdict 付き）
   → 設計レビュー (qa)               NG → 再・詳細設計        ←ループ
   → 実装 (coder ＋ 単体テスト)
   → コードレビュー (qa)              NG → 再実装(coder)      ←ループ
@@ -40,13 +40,13 @@ Snipdash を Claude Code のサブエージェント（`.claude/agents/`）で�
 
 | ファイル | 作成者 | 内容 |
 |---|---|---|
-| `requirements.md` | pm | ゴール / スコープ / FR / **受け入れ基準(DoD)** / 制約 / 人間への質問 |
-| `design.md` | designer | 画面・状態・操作・配色・**lucideアイコン名**・ja/en コピー・a11y |
-| `tech-design.md` | tech-lead | 変更ファイル / スキーマ影響 / コマンド・権限 / テスト計画 / リスク |
-| `review.md` | qa | 設計・コードレビューの verdict と指摘 |
-| `test-report.md` | qa | テスト実行結果・実機検証（スクショ含む）・verdict |
+| `要件定義.md` | pm | ゴール / スコープ / FR / **受け入れ基準(DoD)** / 制約 / 人間への質問 |
+| `基本設計.md` | designer | 画面・状態・操作・配色・**lucideアイコン名**・ja/en コピー・a11y |
+| `詳細設計.md` | tech-lead | 変更ファイル / スキーマ影響 / コマンド・権限 / テスト計画 / リスク |
+| `コードレビュー.md` | qa | 設計・コードレビューの verdict と指摘 |
+| `テストレポート.md` | qa | テスト実行結果・実機検証（スクショ含む）・verdict |
 
-> 詳細は `docs/work/README.md`。
+> 詳細は `docs/work/概要.md`。
 
 ## 受け入れ基準 / Definition of Done
 
