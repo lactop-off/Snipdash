@@ -1,37 +1,18 @@
+import type { CSSProperties } from "react";
 import type { Card } from "@snipdash/sdk";
 import { useStore } from "../store";
 import { translator } from "../i18n";
+import { ColorPicker, colorValue } from "./ColorPicker";
 import { TextCard } from "./TextCard";
-import { LauncherCard } from "./LauncherCard";
 import { RichCard } from "./RichCard";
-
-const COLORS = ["", "red", "orange", "green", "blue", "purple"] as const;
 
 function CardBody({ card, edit }: { card: Card; edit: boolean }) {
   switch (card.type) {
     case "text":
       return <TextCard card={card} edit={edit} />;
-    case "launcher":
-      return <LauncherCard card={card} edit={edit} />;
     case "rich":
       return <RichCard card={card} edit={edit} />;
   }
-}
-
-function ColorPicker({ value, onChange }: { value: string; onChange: (c: string) => void }) {
-  return (
-    <div className="color-picker">
-      {COLORS.map((c) => (
-        <button
-          key={c || "none"}
-          type="button"
-          className={`swatch swatch-${c || "none"}${value === c ? " selected" : ""}`}
-          title={c || "なし"}
-          onClick={() => onChange(c)}
-        />
-      ))}
-    </div>
-  );
 }
 
 export function CardFrame({ card, edit }: { card: Card; edit: boolean }) {
@@ -43,9 +24,31 @@ export function CardFrame({ card, edit }: { card: Card; edit: boolean }) {
   const setLabel = (label: string) => updateCard({ ...card, label: label || undefined });
   const setColor = (colorTag: string) => updateCard({ ...card, colorTag: colorTag || undefined });
 
+  const accent = colorValue(card.colorTag);
+
+  // Todo-only header control: show/hide completed items (works in use mode too).
+  const todoPayload = card.type === "rich" && card.payload.mode === "todo" ? card.payload : null;
+  const doneCount = todoPayload ? todoPayload.items.filter((it) => it.done).length : 0;
+  const toggleHideDone = () => {
+    if (card.type === "rich" && card.payload.mode === "todo") {
+      updateCard({
+        ...card,
+        payload: { ...card.payload, hideCompleted: !card.payload.hideCompleted },
+      });
+    }
+  };
+
   return (
-    <div className={`card${card.colorTag ? " tag-" + card.colorTag : ""}`}>
+    <div
+      className={`card${accent ? " has-color" : ""}`}
+      style={accent ? ({ "--card-accent": accent } as CSSProperties) : undefined}
+    >
       <header className={`card-header${edit ? " card-drag-handle" : ""}`}>
+        {edit && (
+          <span className="card-grip card-drag-handle" title={t("card.drag")} aria-hidden="true">
+            ⠿
+          </span>
+        )}
         {edit ? (
           <input
             className="rgl-cancel card-label-input"
@@ -55,6 +58,18 @@ export function CardFrame({ card, edit }: { card: Card; edit: boolean }) {
           />
         ) : (
           <span className="card-label">{card.label ?? " "}</span>
+        )}
+        {todoPayload && (
+          <button
+            type="button"
+            className="rgl-cancel todo-toggle"
+            title={todoPayload.hideCompleted ? t("todo.showDone") : t("todo.hideDone")}
+            onClick={toggleHideDone}
+          >
+            {todoPayload.hideCompleted ? "○" : "●"}{" "}
+            {todoPayload.hideCompleted ? t("todo.showDone") : t("todo.hideDone")}
+            {doneCount > 0 && <span className="todo-count">{doneCount}</span>}
+          </button>
         )}
         {edit && (
           <div className="card-header-actions rgl-cancel">

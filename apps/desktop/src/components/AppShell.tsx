@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createLauncherCard, createRichCard, createTextCard } from "@snipdash/sdk";
+import { createRichCard, createTextCard } from "@snipdash/sdk";
 import { useStore } from "../store";
 import { translator } from "../i18n";
 import { BoardTabs } from "./BoardTabs";
@@ -40,9 +40,6 @@ export function AppShell() {
                   <button type="button" onClick={() => add(() => createTextCard())}>{t("card.addText")}</button>
                 </li>
                 <li>
-                  <button type="button" onClick={() => add(() => createLauncherCard())}>{t("card.addLauncher")}</button>
-                </li>
-                <li>
                   <button type="button" onClick={() => add(() => createRichCard("markdown"))}>{t("card.addMarkdown")}</button>
                 </li>
                 <li>
@@ -61,8 +58,10 @@ export function AppShell() {
           className={`btn-mode${edit ? " on" : ""}`}
           onClick={toggleMode}
           title={edit ? t("mode.toggleToUse") : t("mode.toggleToEdit")}
+          aria-label={edit ? t("mode.toggleToUse") : t("mode.toggleToEdit")}
+          aria-pressed={edit}
         >
-          {edit ? `🔓 ${t("mode.edit")}` : `🔒 ${t("mode.use")}`}
+          ✏️
         </button>
 
         <div className="popover-anchor">

@@ -10,6 +10,13 @@ export function RichCard({ card, edit }: { card: RichCardType; edit: boolean }) 
     case "code":
       return <CodeView card={card} language={card.payload.language} source={card.payload.source} edit={edit} />;
     case "todo":
-      return <TodoView card={card} items={card.payload.items} edit={edit} />;
+      return (
+        <TodoView
+          card={card}
+          items={card.payload.items}
+          hideCompleted={card.payload.hideCompleted ?? false}
+          edit={edit}
+        />
+      );
   }
 }

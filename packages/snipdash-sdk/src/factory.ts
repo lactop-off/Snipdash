@@ -7,8 +7,6 @@ import {
   type Board,
   type Card,
   type CardLayout,
-  type LauncherCard,
-  type LauncherKind,
   type RichCard,
   type RichMode,
   type TextCard,
@@ -27,6 +25,8 @@ export function newId(): string {
   });
 }
 
+// Default block sizes for newly added cards, in 12-column grid cells. These are
+// the "predetermined sizes" a fresh card snaps to before the user resizes it.
 const DEFAULT_LAYOUT: CardLayout = { x: 0, y: 0, w: 3, h: 3 };
 
 export function createTextCard(layout: Partial<CardLayout> = {}): TextCard {
@@ -35,18 +35,6 @@ export function createTextCard(layout: Partial<CardLayout> = {}): TextCard {
     type: "text",
     layout: { ...DEFAULT_LAYOUT, ...layout },
     payload: { body: "", copyFormat: "plain" },
-  };
-}
-
-export function createLauncherCard(
-  kind: LauncherKind = "url",
-  layout: Partial<CardLayout> = {},
-): LauncherCard {
-  return {
-    id: newId(),
-    type: "launcher",
-    layout: { ...DEFAULT_LAYOUT, w: 3, h: 2, ...layout },
-    payload: { kind, target: "" },
   };
 }
 
@@ -96,8 +84,6 @@ export function copyableText(card: Card): string | null {
       if (card.payload.mode === "markdown" || card.payload.mode === "code") {
         return card.payload.source;
       }
-      return null;
-    case "launcher":
       return null;
   }
 }

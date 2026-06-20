@@ -3,7 +3,7 @@
  * crate. The shapes here are the canonical on-disk / IPC format.
  */
 
-export const CURRENT_SCHEMA_VERSION = 1 as const;
+export const CURRENT_SCHEMA_VERSION = 2 as const;
 
 export type Theme = "light" | "dark" | "system";
 export type Locale = "ja" | "en";
@@ -29,6 +29,8 @@ export interface TextPayload {
   copyFormat: CopyFormat;
 }
 
+/** Args for the `open_target` command (used by inline markdown links). The
+ * standalone launcher card was removed in schema v2. */
 export interface LauncherPayload {
   kind: LauncherKind;
   target: string;
@@ -42,9 +44,11 @@ export interface TodoItem {
 }
 
 export type RichPayload =
-  | { mode: "markdown"; source: string }
+  // `collapsed` holds index-path keys (e.g. "0/1") of folded toggle-list items.
+  | { mode: "markdown"; source: string; collapsed?: string[] }
   | { mode: "code"; language: string; source: string }
-  | { mode: "todo"; items: TodoItem[] };
+  // `hideCompleted` hides done items in both use and edit mode (view preference).
+  | { mode: "todo"; items: TodoItem[]; hideCompleted?: boolean };
 
 interface CardBase {
   id: string;
@@ -54,16 +58,17 @@ interface CardBase {
 }
 
 export type TextCard = CardBase & { type: "text"; payload: TextPayload };
-export type LauncherCard = CardBase & { type: "launcher"; payload: LauncherPayload };
 export type RichCard = CardBase & { type: "rich"; payload: RichPayload };
 
-export type Card = TextCard | LauncherCard | RichCard;
+export type Card = TextCard | RichCard;
 export type CardType = Card["type"];
 
 export interface Board {
   id: string;
   name: string;
   order: number;
+  /** Optional tab accent color (same palette as card `colorTag`). */
+  colorTag?: string;
   grid: GridConfig;
   cards: Card[];
 }
@@ -88,4 +93,8 @@ export interface AppError {
   message: string;
 }
 
+// 12-column grid. Cards snap to these cells in edit mode and the frontend
+// renders square cells (the row height follows the measured column width). The
+// column count is kept in lockstep with the Rust `GridConfig::default()` in
+// snipdash-core. `rowHeight` here is only a fallback until the grid is measured.
 export const DEFAULT_GRID: GridConfig = { cols: 12, rowHeight: 40, gap: 8 };

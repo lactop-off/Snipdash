@@ -38,6 +38,7 @@ interface AppState {
   setActiveBoard: (id: string) => void;
   addBoard: () => void;
   renameBoard: (id: string, name: string) => void;
+  setBoardColor: (id: string, colorTag: string | undefined) => void;
   deleteBoard: (id: string) => void;
   reorderBoards: (orderedIds: string[]) => void;
 
@@ -68,9 +69,30 @@ function activeBoardOf(ws: Workspace): Board | undefined {
   return ws.boards.find((b) => b.id === ws.settings.activeBoardId);
 }
 
-/** Find a non-overlapping placement at the bottom of the active board. */
-function nextPlacement(board: Board): Pick<CardLayout, "x" | "y"> {
+/**
+ * First-fit placement for a new w×h card: scan row by row, left to right, and
+ * return the first spot where it fits without overlapping. This fills space to
+ * the right first and only drops to a new row (bottom) when nothing fits.
+ */
+function nextPlacement(board: Board, w: number, h: number): Pick<CardLayout, "x" | "y"> {
+  const cols = board.grid.cols;
+  const cw = Math.min(w, cols);
   const bottom = board.cards.reduce((max, c) => Math.max(max, c.layout.y + c.layout.h), 0);
+
+  const overlaps = (x: number, y: number) =>
+    board.cards.some(
+      (c) =>
+        x < c.layout.x + c.layout.w &&
+        x + cw > c.layout.x &&
+        y < c.layout.y + c.layout.h &&
+        y + h > c.layout.y,
+    );
+
+  for (let y = 0; y <= bottom; y++) {
+    for (let x = 0; x + cw <= cols; x++) {
+      if (!overlaps(x, y)) return { x, y };
+    }
+  }
   return { x: 0, y: bottom };
 }
 
@@ -135,6 +157,13 @@ export const useStore = create<AppState>((set, get) => {
         return ws;
       }),
 
+    setBoardColor: (id, colorTag) =>
+      commit((ws) => {
+        const board = ws.boards.find((b) => b.id === id);
+        if (board) board.colorTag = colorTag || undefined;
+        return ws;
+      }),
+
     deleteBoard: (id) =>
       commit((ws) => {
         ws.boards = ws.boards.filter((b) => b.id !== id);
@@ -170,7 +199,7 @@ export const useStore = create<AppState>((set, get) => {
 
     addCard: (card) =>
       mutateActiveBoard((board) => {
-        const place = nextPlacement(board);
+        const place = nextPlacement(board, card.layout.w, card.layout.h);
         card.layout = { ...card.layout, x: place.x, y: place.y };
         board.cards.push(card);
       }),

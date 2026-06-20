@@ -3,13 +3,23 @@ import { createTodoItem } from "@snipdash/sdk";
 import { useStore } from "../store";
 import { translator } from "../i18n";
 
-export function TodoView({ card, items, edit }: { card: RichCard; items: TodoItem[]; edit: boolean }) {
+export function TodoView({
+  card,
+  items,
+  hideCompleted,
+  edit,
+}: {
+  card: RichCard;
+  items: TodoItem[];
+  hideCompleted: boolean;
+  edit: boolean;
+}) {
   const updateCard = useStore((s) => s.updateCard);
   const locale = useStore((s) => s.workspace?.settings.locale ?? "ja");
   const t = translator(locale);
 
   const setItems = (next: TodoItem[]) =>
-    updateCard({ ...card, payload: { mode: "todo", items: next } });
+    updateCard({ ...card, payload: { mode: "todo", items: next, hideCompleted } });
 
   // Toggling a checkbox is allowed in both modes (state persists immediately).
   const toggle = (id: string) =>
@@ -19,10 +29,12 @@ export function TodoView({ card, items, edit }: { card: RichCard; items: TodoIte
   const remove = (id: string) => setItems(items.filter((it) => it.id !== id));
   const add = () => setItems([...items, createTodoItem()]);
 
+  const shown = hideCompleted ? items.filter((it) => !it.done) : items;
+
   return (
     <div className="card-content todo-card">
       <ul className="todo-list">
-        {items.map((it) => (
+        {shown.map((it) => (
           <li key={it.id} className={it.done ? "todo-item done" : "todo-item"}>
             <label className="rgl-cancel todo-check">
               <input type="checkbox" checked={it.done} onChange={() => toggle(it.id)} />

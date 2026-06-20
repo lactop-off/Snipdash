@@ -7,7 +7,10 @@
 use serde::{Deserialize, Serialize};
 
 /// The schema version this build understands and writes.
-pub const CURRENT_SCHEMA_VERSION: u32 = 1;
+///
+/// v2 removed the standalone `launcher` card type; the migration converts any
+/// existing launcher cards into markdown cards with an inline link.
+pub const CURRENT_SCHEMA_VERSION: u32 = 2;
 
 /// Root of all persisted data. Serialized to a single `workspace.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -51,6 +54,9 @@ pub struct Board {
     pub id: String,
     pub name: String,
     pub order: u32,
+    /// Optional tab accent color (same palette as a card's `color_tag`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color_tag: Option<String>,
     pub grid: GridConfig,
     pub cards: Vec<Card>,
 }
@@ -65,6 +71,9 @@ pub struct GridConfig {
 
 impl Default for GridConfig {
     fn default() -> Self {
+        // 12-column grid, kept in lockstep with `DEFAULT_GRID` in the TypeScript
+        // SDK. The frontend renders square cells by deriving the row height from
+        // the measured column width; `row_height` here is only a fallback.
         Self {
             cols: 12,
             row_height: 40,
@@ -87,7 +96,6 @@ pub struct CardLayout {
 #[serde(tag = "type", rename_all = "lowercase")]
 pub enum Card {
     Text(TextCard),
-    Launcher(LauncherCard),
     Rich(RichCard),
 }
 
@@ -117,18 +125,9 @@ pub enum CopyFormat {
     Rich,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct LauncherCard {
-    pub id: String,
-    pub layout: CardLayout,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub label: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub color_tag: Option<String>,
-    pub payload: LauncherPayload,
-}
-
+/// Payload for the `open_target` command. The standalone launcher *card* was
+/// removed in schema v2 (links now live inline in markdown), but the backend
+/// still opens URLs/files through this validated payload.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LauncherPayload {
@@ -164,6 +163,10 @@ pub struct RichCard {
 pub enum RichPayload {
     Markdown {
         source: String,
+        /// Index-path keys (e.g. "0/1") of collapsed toggle-list items. Kept so
+        /// the backend round-trips the field instead of dropping it on save.
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        collapsed: Vec<String>,
     },
     Code {
         language: String,
@@ -171,7 +174,14 @@ pub enum RichPayload {
     },
     Todo {
         items: Vec<TodoItem>,
+        /// Hide done items in the UI (a view preference, persisted on the card).
+        #[serde(rename = "hideCompleted", default, skip_serializing_if = "is_false")]
+        hide_completed: bool,
     },
+}
+
+fn is_false(b: &bool) -> bool {
+    !*b
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -186,7 +196,6 @@ impl Card {
     pub fn id(&self) -> &str {
         match self {
             Card::Text(c) => &c.id,
-            Card::Launcher(c) => &c.id,
             Card::Rich(c) => &c.id,
         }
     }
@@ -194,7 +203,6 @@ impl Card {
     pub fn layout(&self) -> &CardLayout {
         match self {
             Card::Text(c) => &c.layout,
-            Card::Launcher(c) => &c.layout,
             Card::Rich(c) => &c.layout,
         }
     }
@@ -202,7 +210,6 @@ impl Card {
     pub fn type_name(&self) -> &'static str {
         match self {
             Card::Text(_) => "text",
-            Card::Launcher(_) => "launcher",
             Card::Rich(_) => "rich",
         }
     }
