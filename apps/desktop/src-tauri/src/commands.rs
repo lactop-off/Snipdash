@@ -86,14 +86,28 @@ pub fn set_always_on_top<R: Runtime>(app: AppHandle<R>, enabled: bool) -> AppRes
         .map_err(|e| AppError::internal(e.to_string()))
 }
 
-/// Global hotkey registration is planned for v1.1 (FR-13). The command exists so
-/// the IPC contract is stable; it currently reports unsupported.
+/// (Re)register the global hotkey: clears any previous binding and registers
+/// `accelerator` (e.g. "CmdOrCtrl+Shift+Space"). An empty string disables it.
+/// Desktop-only; a no-op on platforms without global shortcuts.
 #[tauri::command]
-pub fn register_global_hotkey(accelerator: String) -> AppResult<()> {
-    let _ = accelerator;
-    Err(AppError::unsupported(
-        "グローバルホットキーは v1.1 で対応予定です",
-    ))
+pub fn register_global_hotkey<R: Runtime>(app: AppHandle<R>, accelerator: String) -> AppResult<()> {
+    #[cfg(desktop)]
+    {
+        use tauri_plugin_global_shortcut::GlobalShortcutExt;
+        let gs = app.global_shortcut();
+        let _ = gs.unregister_all();
+        let accel = accelerator.trim();
+        if !accel.is_empty() {
+            gs.register(accel)
+                .map_err(|e| AppError::new(ErrorCode::Internal, e.to_string()))?;
+        }
+        Ok(())
+    }
+    #[cfg(not(desktop))]
+    {
+        let _ = (app, accelerator);
+        Err(AppError::unsupported("global shortcuts unavailable on this platform"))
+    }
 }
 
 /// Expand a leading `~` to the user's home directory; OS openers do not do this.

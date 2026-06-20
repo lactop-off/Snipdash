@@ -4,7 +4,6 @@ import { EditorView } from "@codemirror/view";
 import type { RichCard } from "@snipdash/sdk";
 import { useStore } from "../store";
 import { translator } from "../i18n";
-import { copyResolved } from "../actions";
 import { LANGUAGE_PRESETS, languageExtension } from "./languages";
 
 export function CodeView({
@@ -59,16 +58,6 @@ export function CodeView({
           basicSetup={{ lineNumbers: true, foldGutter: false, highlightActiveLine: edit }}
           onChange={(value) => edit && setSource(value)}
         />
-      </div>
-      <div className="card-toolbar">
-        <button
-          type="button"
-          className="rgl-cancel btn-primary"
-          disabled={source.trim().length === 0}
-          onClick={() => copyResolved(source, locale)}
-        >
-          {t("card.copy")}
-        </button>
       </div>
     </div>
   );

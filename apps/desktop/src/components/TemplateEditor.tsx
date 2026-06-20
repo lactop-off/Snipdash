@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { TEMPLATE_VARIABLES } from "@snipdash/sdk";
+import { Icon } from "./Icon";
 
 type Ref = React.RefObject<HTMLTextAreaElement | null>;
 
@@ -90,17 +91,17 @@ export function TemplateEditor({
     }
   };
 
-  const tools: { label: string; title: string; run: () => void }[] = [
-    { label: "B", title: "太字", run: () => surround(ref, value, onChange, "**", "**", "太字") },
-    { label: "i", title: "斜体", run: () => surround(ref, value, onChange, "*", "*", "斜体") },
-    { label: "H1", title: "見出し1", run: () => prefixLine(ref, value, onChange, "# ") },
-    { label: "H2", title: "見出し2", run: () => prefixLine(ref, value, onChange, "## ") },
-    { label: "•", title: "箇条書き", run: () => prefixLine(ref, value, onChange, "- ") },
-    { label: "❝", title: "引用", run: () => prefixLine(ref, value, onChange, "> ") },
-    { label: "</>", title: "コード", run: () => surround(ref, value, onChange, "`", "`", "code") },
-    { label: "🔗", title: "リンク", run: () => surround(ref, value, onChange, "[", "](https://)", "リンク名") },
-    { label: "🖼", title: "画像（サイズ指定可: |幅x高さ）", run: () => surround(ref, value, onChange, "![", "|300](https://)", "代替テキスト") },
-    { label: "⧉", title: "コピー要素", run: () => surround(ref, value, onChange, "[[", "]]", "コピーする文字") },
+  const tools: { icon: string; title: string; run: () => void }[] = [
+    { icon: "bold", title: "太字", run: () => surround(ref, value, onChange, "**", "**", "太字") },
+    { icon: "italic", title: "斜体", run: () => surround(ref, value, onChange, "*", "*", "斜体") },
+    { icon: "heading-1", title: "見出し1", run: () => prefixLine(ref, value, onChange, "# ") },
+    { icon: "heading-2", title: "見出し2", run: () => prefixLine(ref, value, onChange, "## ") },
+    { icon: "list", title: "箇条書き", run: () => prefixLine(ref, value, onChange, "- ") },
+    { icon: "quote", title: "引用", run: () => prefixLine(ref, value, onChange, "> ") },
+    { icon: "code", title: "コード", run: () => surround(ref, value, onChange, "`", "`", "code") },
+    { icon: "link", title: "リンク", run: () => surround(ref, value, onChange, "[", "](https://)", "リンク名") },
+    { icon: "image", title: "画像（サイズ指定可: |幅x高さ）", run: () => surround(ref, value, onChange, "![", "|300](https://)", "代替テキスト") },
+    { icon: "copy", title: "コピー要素", run: () => surround(ref, value, onChange, "[[", "]]", "コピーする文字") },
   ];
 
   return (
@@ -108,8 +109,8 @@ export function TemplateEditor({
       {markdown && (
         <div className="md-toolbar rgl-cancel">
           {tools.map((tl) => (
-            <button key={tl.title} type="button" className="md-tool" title={tl.title} onClick={tl.run}>
-              {tl.label}
+            <button key={tl.title} type="button" className="md-tool" title={tl.title} aria-label={tl.title} onClick={tl.run}>
+              <Icon name={tl.icon} size={16} />
             </button>
           ))}
         </div>

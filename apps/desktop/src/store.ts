@@ -6,6 +6,8 @@ import {
   type Settings,
   type Workspace,
   createBoard,
+  createRichCard,
+  createTodoItem,
   loadWorkspace,
   saveWorkspace,
 } from "@snipdash/sdk";
@@ -30,6 +32,8 @@ interface AppState {
   loaded: boolean;
   /** True when the Tauri backend is available (so changes persist). */
   tauri: boolean;
+  /** Card briefly highlighted after jumping from the Today panel (auto-clears). */
+  flashCardId: string | null;
 
   init: () => Promise<void>;
   setMode: (mode: Mode) => void;
@@ -46,6 +50,17 @@ interface AppState {
   updateCard: (card: Card) => void;
   removeCard: (cardId: string) => void;
   applyLayout: (items: LayoutItem[]) => void;
+  /** Stamp a todo item's `notifiedAt` (searches all boards) so a fired reminder
+   * isn't repeated across restarts. */
+  markTodoNotified: (cardId: string, itemId: string, iso: string) => void;
+  /** Toggle a todo item's done flag, searching across all boards (used by the
+   * Today panel, where the item may live on a non-active board). */
+  toggleTodoItem: (cardId: string, itemId: string) => void;
+  /** Quick-capture: append a todo item to the auto-created "Inbox" board's todo
+   * card (creating board/card as needed). Does not change the active board. */
+  captureToInbox: (text: string) => void;
+  /** Jump-highlight a card for ~1.5s (set by the Today panel on jump). */
+  flashCard: (cardId: string) => void;
 
   updateSettings: (partial: Partial<Settings>) => void;
 }
@@ -118,6 +133,7 @@ export const useStore = create<AppState>((set, get) => {
     mode: "use",
     loaded: false,
     tauri: true,
+    flashCardId: null,
 
     init: async () => {
       try {
@@ -223,6 +239,60 @@ export const useStore = create<AppState>((set, get) => {
           if (it) c.layout = { x: it.x, y: it.y, w: it.w, h: it.h };
         });
       }),
+
+    markTodoNotified: (cardId, itemId, iso) =>
+      commit((ws) => {
+        for (const board of ws.boards) {
+          const card = board.cards.find((c) => c.id === cardId);
+          if (card?.type === "rich" && card.payload.mode === "todo") {
+            const item = card.payload.items.find((it) => it.id === itemId);
+            if (item) item.notifiedAt = iso;
+            break;
+          }
+        }
+        return ws;
+      }),
+
+    toggleTodoItem: (cardId, itemId) =>
+      commit((ws) => {
+        for (const board of ws.boards) {
+          const card = board.cards.find((c) => c.id === cardId);
+          if (card?.type === "rich" && card.payload.mode === "todo") {
+            const item = card.payload.items.find((it) => it.id === itemId);
+            if (item) item.done = !item.done;
+            break;
+          }
+        }
+        return ws;
+      }),
+
+    captureToInbox: (text) =>
+      commit((ws) => {
+        const trimmed = text.trim();
+        if (!trimmed) return ws;
+        let inbox = ws.boards.find((b) => b.name === "Inbox");
+        if (!inbox) {
+          inbox = createBoard("Inbox", ws.boards.length);
+          ws.boards.push(inbox);
+        }
+        let card = inbox.cards.find((c) => c.type === "rich" && c.payload.mode === "todo");
+        if (!card) {
+          card = createRichCard("todo");
+          if (card.type === "rich" && card.payload.mode === "todo") card.payload.items = [];
+          inbox.cards.push(card);
+        }
+        if (card.type === "rich" && card.payload.mode === "todo") {
+          card.payload.items.push(createTodoItem(trimmed));
+        }
+        return ws;
+      }),
+
+    flashCard: (cardId) => {
+      set({ flashCardId: cardId });
+      setTimeout(() => {
+        if (get().flashCardId === cardId) set({ flashCardId: null });
+      }, 1500);
+    },
 
     updateSettings: (partial) =>
       commit((ws) => {

@@ -1,7 +1,6 @@
 import type { TextCard as TextCardType } from "@snipdash/sdk";
 import { useStore } from "../store";
 import { translator } from "../i18n";
-import { copyResolved } from "../actions";
 import { TemplateEditor } from "./TemplateEditor";
 
 export function TextCard({ card, edit }: { card: TextCardType; edit: boolean }) {
@@ -30,16 +29,6 @@ export function TextCard({ card, edit }: { card: TextCardType; edit: boolean }) 
       <pre className="text-body">
         {empty ? <span className="muted">{t("card.emptyBody")}</span> : card.payload.body}
       </pre>
-      <div className="card-toolbar">
-        <button
-          type="button"
-          className="rgl-cancel btn-primary"
-          disabled={empty}
-          onClick={() => copyResolved(card.payload.body, locale)}
-        >
-          {t("card.copy")}
-        </button>
-      </div>
     </div>
   );
 }

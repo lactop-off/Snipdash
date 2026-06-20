@@ -4,6 +4,7 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { useActiveBoard, useStore } from "../store";
 import { CardFrame } from "./CardFrame";
+import { SpacerCard } from "./SpacerCard";
 
 const ResponsiveGrid = WidthProvider(GridLayout);
 
@@ -16,6 +17,7 @@ const MIN_H = 2;
 export function GridCanvas({ edit }: { edit: boolean }) {
   const board = useActiveBoard();
   const applyLayout = useStore((s) => s.applyLayout);
+  const flashCardId = useStore((s) => s.flashCardId);
   const canvasRef = useRef<HTMLDivElement>(null);
   // Available column width measured from the canvas. We then snap it to a whole
   // pixel so react-grid-layout's rounded item positions line up *exactly* with
@@ -83,10 +85,9 @@ export function GridCanvas({ edit }: { edit: boolean }) {
           isDraggable={edit}
           isResizable={edit}
           isBounded
-          // Free placement with collision pushing (Metabase-style): dragging or
-          // resizing a card shoves neighbours out of the way instead of being
-          // blocked, and there is no gravity pulling cards to the top.
-          compactType={null}
+          // Cards float up to fill empty space above them (vertical gravity);
+          // dragging/resizing still pushes neighbours out of the way.
+          compactType="vertical"
           draggableHandle=".card-drag-handle"
           draggableCancel=".rgl-cancel"
           onLayoutChange={(l: Layout[]) => {
@@ -96,8 +97,12 @@ export function GridCanvas({ edit }: { edit: boolean }) {
           }}
         >
           {board.cards.map((card) => (
-            <div key={card.id} className="grid-item">
-              <CardFrame card={card} edit={edit} />
+            <div key={card.id} className={`grid-item${flashCardId === card.id ? " flash" : ""}`}>
+              {card.type === "spacer" ? (
+                <SpacerCard card={card} edit={edit} />
+              ) : (
+                <CardFrame card={card} edit={edit} />
+              )}
             </div>
           ))}
         </ResponsiveGrid>

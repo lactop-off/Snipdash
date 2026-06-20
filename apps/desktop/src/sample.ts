@@ -23,9 +23,11 @@ export function sampleWorkspace(): Workspace {
   todo.label = "本日のタスク";
   todo.colorTag = "#e11d48";
   if (todo.payload.mode === "todo") {
+    const due = (ms: number) => new Date(Date.now() + ms).toISOString();
     todo.payload.items = [
-      createTodoItem("メールの返信"),
-      createTodoItem("日報の作成"),
+      { ...createTodoItem("メールの返信"), due: due(-30 * 60_000) }, // overdue
+      { ...createTodoItem("見積りレビュー"), due: due(30 * 60_000) }, // soon (<1h)
+      { ...createTodoItem("日報の作成"), due: due(3 * 60 * 60_000) }, // later today
       { ...createTodoItem("ミーティング"), done: true },
     ];
   }

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import type { RichCard } from "@snipdash/sdk";
 import { useStore } from "../store";
-import { translator } from "../i18n";
 import { copyResolved, openLauncher } from "../actions";
 import { renderMarkdown, listItemKey } from "./markdown";
 import { TemplateEditor } from "./TemplateEditor";
@@ -9,7 +8,6 @@ import { TemplateEditor } from "./TemplateEditor";
 export function MarkdownView({ card, source, edit }: { card: RichCard; source: string; edit: boolean }) {
   const updateCard = useStore((s) => s.updateCard);
   const locale = useStore((s) => s.workspace?.settings.locale ?? "ja");
-  const t = translator(locale);
   const bodyRef = useRef<HTMLDivElement>(null);
   const html = useMemo(() => renderMarkdown(source), [source]);
 
@@ -75,11 +73,22 @@ export function MarkdownView({ card, source, edit }: { card: RichCard; source: s
       e.preventDefault();
       const href = anchor.getAttribute("href");
       if (href) {
-        // URLs open in the browser/mail client; anything else is treated as a
-        // local path and opened by the OS (folder → file manager, file → its
-        // default app, executable → launch).
-        const kind = /^(https?:|mailto:)/i.test(href) ? "url" : "file";
-        void openLauncher(kind, href, locale);
+        if (/^(https?:|mailto:)/i.test(href)) {
+          // URLs open in the browser / mail client.
+          void openLauncher("url", href, locale);
+        } else {
+          // Anything else is a local path opened by the OS (folder → file
+          // manager, file → default app, executable → launch). markdown-it
+          // percent-encodes the destination (e.g. "\\"→"%5C", " "→"%20"), so
+          // decode it back to a real filesystem path before opening.
+          let path = href;
+          try {
+            path = decodeURI(href);
+          } catch {
+            /* keep the raw value if it isn't valid percent-encoding */
+          }
+          void openLauncher("file", path, locale);
+        }
       }
     }
   };
@@ -92,7 +101,6 @@ export function MarkdownView({ card, source, edit }: { card: RichCard; source: s
     );
   }
 
-  const empty = source.trim().length === 0;
   return (
     <div className="card-content markdown-card">
       <div
@@ -101,16 +109,6 @@ export function MarkdownView({ card, source, edit }: { card: RichCard; source: s
         onClick={onBodyClick}
         dangerouslySetInnerHTML={{ __html: html }}
       />
-      <div className="card-toolbar">
-        <button
-          type="button"
-          className="rgl-cancel btn-primary"
-          disabled={empty}
-          onClick={() => copyResolved(source, locale)}
-        >
-          {t("card.copy")}
-        </button>
-      </div>
     </div>
   );
 }

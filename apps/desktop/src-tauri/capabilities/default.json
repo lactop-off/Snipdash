@@ -1,13 +1,14 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Snipdash default capability — least privilege. File IO is performed in Rust (no fs plugin exposed to the webview); the webview may only write text to the clipboard and open URLs/paths via the opener command, plus toggle always-on-top.",
+  "description": "Snipdash default capability — least privilege. File IO is performed in Rust (no fs plugin exposed to the webview); the webview may only write text to the clipboard, open URLs/paths via the opener command, toggle always-on-top, and post reminder notifications.",
   "windows": ["main"],
   "permissions": [
     "core:default",
     "core:window:allow-set-always-on-top",
     "clipboard-manager:allow-write-text",
     "opener:allow-open-url",
-    "opener:allow-open-path"
+    "opener:allow-open-path",
+    "notification:default"
   ]
 }

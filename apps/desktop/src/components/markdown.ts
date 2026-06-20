@@ -1,4 +1,5 @@
 import MarkdownIt from "markdown-it";
+import copyIconRaw from "../assets/icons/copy.svg?raw";
 
 // html:false keeps raw HTML out, so rendering via innerHTML is safe.
 // linkify turns bare URLs into <a>; standard [label](url) links render too.
@@ -33,7 +34,7 @@ md.renderer.rules.copytag = (tokens, idx) => {
   return (
     `<span class="md-copy">` +
     `<code class="md-copy-text">${esc(display)}</code>` +
-    `<button type="button" class="md-copy-btn rgl-cancel" data-copy="${esc(copy)}" title="コピー" aria-label="コピー">⧉</button>` +
+    `<button type="button" class="md-copy-btn rgl-cancel" data-copy="${esc(copy)}" title="コピー" aria-label="コピー">${copyIconRaw}</button>` +
     `</span>`
   );
 };

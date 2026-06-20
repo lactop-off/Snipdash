@@ -1,7 +1,24 @@
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
+import { type Board, dueUrgency } from "@snipdash/sdk";
 import { useStore } from "../store";
 import { translator } from "../i18n";
 import { ColorPicker, colorValue } from "./ColorPicker";
+import { Icon } from "./Icon";
+
+/** Most pressing reminder state across a board's active todo items. */
+function boardDueUrgency(board: Board, now: number): "overdue" | "soon" | null {
+  let soon = false;
+  for (const card of board.cards) {
+    if (card.type !== "rich" || card.payload.mode !== "todo") continue;
+    for (const it of card.payload.items) {
+      if (it.done) continue;
+      const u = dueUrgency(it, now);
+      if (u === "overdue") return "overdue";
+      if (u === "soon") soon = true;
+    }
+  }
+  return soon ? "soon" : null;
+}
 
 export function BoardTabs({ edit }: { edit: boolean }) {
   const boards = useStore((s) => s.workspace?.boards ?? []);
@@ -18,7 +35,22 @@ export function BoardTabs({ edit }: { edit: boolean }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
 
+  // F2 starts renaming the active tab (the rename state lives here).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "F2") return;
+      const id = useStore.getState().workspace?.settings.activeBoardId;
+      if (id) {
+        e.preventDefault();
+        setEditingId(id);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   const ordered = [...boards].sort((a, b) => a.order - b.order);
+  const now = Date.now();
 
   const handleDrop = (targetId: string) => {
     if (!dragId || dragId === targetId) return;
@@ -35,6 +67,7 @@ export function BoardTabs({ edit }: { edit: boolean }) {
     <div className="board-tabs">
       {ordered.map((b) => {
         const editing = editingId === b.id;
+        const dueUrg = boardDueUrgency(b, now);
         return (
           <div
             key={b.id}
@@ -75,24 +108,26 @@ export function BoardTabs({ edit }: { edit: boolean }) {
             ) : (
               <span className="tab-name">{b.name}</span>
             )}
+            {!editing && dueUrg && <span className="tab-due-dot" data-urgency={dueUrg} />}
             {edit && !editing && (
               <button
                 type="button"
                 className="tab-close"
                 title={t("board.delete")}
+                aria-label={t("board.delete")}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (confirm(t("board.deleteConfirm"))) deleteBoard(b.id);
                 }}
               >
-                ×
+                <Icon name="x" size={14} />
               </button>
             )}
           </div>
         );
       })}
-      <button type="button" className="tab-add" title={t("board.add")} onClick={() => addBoard()}>
-        ＋
+      <button type="button" className="tab-add" title={t("board.add")} aria-label={t("board.add")} onClick={() => addBoard()}>
+        <Icon name="plus" size={15} />
       </button>
     </div>
   );
