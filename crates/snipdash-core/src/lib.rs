@@ -54,7 +54,6 @@ mod tests {
         let ws = default_workspace();
         let json = to_pretty_json(&ws).unwrap();
         assert!(json.contains("\"type\": \"text\""));
-        assert!(json.contains("\"type\": \"launcher\""));
         assert!(json.contains("\"type\": \"rich\""));
         // rich sub-mode tag
         assert!(json.contains("\"mode\": \"markdown\""));
@@ -156,5 +155,33 @@ mod tests {
             },
         });
         assert!(validate_card(&card, &grid).is_err());
+    }
+
+    #[test]
+    fn migrates_v1_launcher_to_markdown_link() {
+        let json = r#"{
+            "schemaVersion": 1,
+            "settings": { "theme": "system", "alwaysOnTop": false, "activeBoardId": "b1", "locale": "ja" },
+            "boards": [
+                { "id": "b1", "name": "Links", "order": 0,
+                  "grid": { "cols": 12, "rowHeight": 40, "gap": 8 },
+                  "cards": [
+                    { "type": "launcher", "id": "c1", "layout": {"x":0,"y":0,"w":3,"h":2},
+                      "label": "GitHub", "payload": {"kind":"url","target":"https://github.com"} }
+                  ] }
+            ]
+        }"#;
+        let ws = load_from_str(json).expect("v1 launcher should migrate");
+        assert_eq!(ws.schema_version, CURRENT_SCHEMA_VERSION);
+        let card = &ws.boards[0].cards[0];
+        match card {
+            Card::Rich(rc) => match &rc.payload {
+                RichPayload::Markdown { source, .. } => {
+                    assert_eq!(source, "[GitHub](https://github.com)");
+                }
+                _ => panic!("expected markdown payload"),
+            },
+            _ => panic!("launcher should become a rich card"),
+        }
     }
 }

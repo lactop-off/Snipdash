@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Snipdash</title>
+    <script>
+      // Minimal `process` shim. Some CommonJS deps (e.g. react-draggable, used
+      // by react-grid-layout) read `process.env.*` at runtime. In the browser
+      // and the Tauri webview `process` is undefined, which throws
+      // "process is not defined" — notably from react-draggable's debug logger
+      // on every drag, silently breaking card movement. Defining an empty env
+      // makes those reads return undefined instead of throwing.
+      window.process = window.process || { env: {} };
+    </script>
   </head>
   <body>
     <div id="root"></div>

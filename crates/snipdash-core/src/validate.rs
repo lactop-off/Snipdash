@@ -110,10 +110,6 @@ pub fn validate_card(card: &Card, grid: &GridConfig) -> CoreResult<()> {
         )));
     }
 
-    if let Card::Launcher(c) = card {
-        validate_launcher_payload(&c.payload)?;
-    }
-
     Ok(())
 }
 

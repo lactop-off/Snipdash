@@ -24,28 +24,6 @@ fn text_card(x: u32, y: u32, w: u32, h: u32, label: &str, body: &str) -> Card {
     })
 }
 
-fn launcher_card(
-    x: u32,
-    y: u32,
-    w: u32,
-    h: u32,
-    label: &str,
-    kind: LauncherKind,
-    target: &str,
-) -> Card {
-    Card::Launcher(LauncherCard {
-        id: uuid(),
-        layout: CardLayout { x, y, w, h },
-        label: Some(label.to_string()),
-        color_tag: None,
-        payload: LauncherPayload {
-            kind,
-            target: target.to_string(),
-            icon: None,
-        },
-    })
-}
-
 fn rich_card(x: u32, y: u32, w: u32, h: u32, label: &str, payload: RichPayload) -> Card {
     Card::Rich(RichCard {
         id: uuid(),
@@ -70,6 +48,7 @@ pub fn default_workspace() -> Workspace {
         id: uuid(),
         name: "業務定型".to_string(),
         order: 0,
+        color_tag: Some("blue".to_string()),
         grid: GridConfig::default(),
         cards: vec![
             text_card(
@@ -100,6 +79,7 @@ pub fn default_workspace() -> Workspace {
                         todo_item("日報の作成", false),
                         todo_item("ミーティング", true),
                     ],
+                    hide_completed: false,
                 },
             ),
         ],
@@ -109,6 +89,7 @@ pub fn default_workspace() -> Workspace {
         id: uuid(),
         name: "開発".to_string(),
         order: 1,
+        color_tag: Some("green".to_string()),
         grid: GridConfig::default(),
         cards: vec![
             rich_card(
@@ -130,14 +111,16 @@ pub fn default_workspace() -> Workspace {
                 "接続文字列",
                 "postgres://user:password@localhost:5432/mydb",
             ),
-            launcher_card(
+            rich_card(
                 6,
                 4,
                 6,
                 2,
                 "プロジェクトフォルダ",
-                LauncherKind::Folder,
-                "~/projects",
+                RichPayload::Markdown {
+                    source: "`~/projects`".to_string(),
+                    collapsed: vec![],
+                },
             ),
         ],
     };
@@ -146,6 +129,7 @@ pub fn default_workspace() -> Workspace {
         id: uuid(),
         name: "リンク集".to_string(),
         order: 2,
+        color_tag: Some("purple".to_string()),
         grid: GridConfig::default(),
         cards: vec![
             rich_card(
@@ -155,18 +139,31 @@ pub fn default_workspace() -> Workspace {
                 6,
                 "ようこそ",
                 RichPayload::Markdown {
-                    source: "# Snipdash へようこそ 👋\n\nこれは **リンク集** 盤面です。\n\n- カードを **ワンクリックでコピー / 起動**できます\n- 右上の **鍵アイコン** で *編集モード* に切り替えると、移動・リサイズ・追加・編集ができます\n- 本文に `{{TODAY}}` などの変数を入れると、コピー時に展開されます\n\n自分専用の盤面を育てていきましょう。".to_string(),
+                    source: "# Snipdash へようこそ 👋\n\nこれは **リンク集** 盤面です。\n\n- カードを **ワンクリックでコピー / 起動**できます\n- 本文に [GitHub](https://github.com) のようにリンクを書けます（クリックで開きます）\n- `{{TODAY}}` などの変数はコピー時に展開されます\n\n## 折りたたみ（ネスト箇条書き）\n- プロジェクト\n  - [main](https://github.com)\n  - [docs](https://developer.mozilla.org)\n- メモ\n  - 子項目 1\n  - 子項目 2\n\n自分専用の盤面を育てていきましょう。".to_string(),
+                    collapsed: vec![],
                 },
             ),
-            launcher_card(6, 0, 3, 2, "GitHub", LauncherKind::Url, "https://github.com"),
-            launcher_card(
+            rich_card(
+                6,
+                0,
+                3,
+                2,
+                "GitHub",
+                RichPayload::Markdown {
+                    source: "[GitHub](https://github.com)".to_string(),
+                    collapsed: vec![],
+                },
+            ),
+            rich_card(
                 9,
                 0,
                 3,
                 2,
                 "MDN",
-                LauncherKind::Url,
-                "https://developer.mozilla.org",
+                RichPayload::Markdown {
+                    source: "[MDN](https://developer.mozilla.org)".to_string(),
+                    collapsed: vec![],
+                },
             ),
         ],
     };

@@ -7,13 +7,17 @@ services:
       dockerfile: Dockerfile
     image: snipdash-dev
     working_dir: /workspace
-    # Keep an interactive shell alive: `docker compose exec dev bash`.
+    # Start the app automatically on `up` (mode via APP_MODE in .env). A shell is
+    # still available any time with: docker compose exec dev bash
     stdin_open: true
     tty: true
-    command: bash
+    command: ["bash", "docker/entrypoint.sh"]
     ports:
       - "1420:1420" # Vite dev server — open http://localhost:1420 on the host
     environment:
+      # App mode for the entrypoint: development | production | manual.
+      # Sourced from the .env file (see .env.example); defaults to development.
+      APP_MODE: "${APP_MODE:-development}"
       CARGO_TARGET_DIR: /workspace/target
       # --- Native window via X11 (Linux host only; see docs/docker.md) ---
       # DISPLAY: ${DISPLAY}

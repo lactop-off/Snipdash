@@ -64,17 +64,12 @@ pub fn open_target<R: Runtime>(
             .map_err(|e| AppError::new(ErrorCode::Open, e.to_string())),
         LauncherKind::File | LauncherKind::Folder => {
             let path = expand_tilde(&app, target.trim());
-            let meta = std::fs::metadata(&path)
+            // Existence is the only gate: the OS opens a folder in the file
+            // manager and a file with its default app (opening an executable
+            // launches it). Inline links don't know file-vs-folder up front, so
+            // we no longer require the kind to match the on-disk type.
+            std::fs::metadata(&path)
                 .map_err(|_| AppError::not_found(format!("対象が見つかりません: {path}")))?;
-            let kind_ok = match kind {
-                LauncherKind::File => meta.is_file(),
-                _ => meta.is_dir(),
-            };
-            if !kind_ok {
-                return Err(AppError::invalid_target(format!(
-                    "対象の種別が一致しません: {path}"
-                )));
-            }
             app.opener()
                 .open_path(path, None::<&str>)
                 .map_err(|e| AppError::new(ErrorCode::Open, e.to_string()))

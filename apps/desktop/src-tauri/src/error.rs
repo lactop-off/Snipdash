@@ -37,6 +37,9 @@ impl AppError {
         Self::new(ErrorCode::NotFound, message)
     }
 
+    // Retained as part of the error surface even though no command currently
+    // emits it (the launcher card that did was removed in schema v2).
+    #[allow(dead_code)]
     pub fn invalid_target(message: impl Into<String>) -> Self {
         Self::new(ErrorCode::InvalidTarget, message)
     }
