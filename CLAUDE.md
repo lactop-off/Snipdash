@@ -66,6 +66,14 @@ Cards render through `CardFrame` → `TextCard`/`RichCard` (→ `MarkdownView`/`
 - The detailed product spec is `docs/spec.md`; Docker dev workflow is `docs/docker.md`.
 - Icons come from Iconify (lucide): SVGs are downloaded into `apps/desktop/src/assets/icons/` and inlined via `apps/desktop/src/components/Icon.tsx` (they use `currentColor`). Don't hand-author icon SVGs or pull icons at runtime.
 
+## Branch / PR workflow
+
+Full rules in `CONTRIBUTING.md`. Key points (agents must follow these too):
+- Trunk is **`main`**. Work on a short-lived branch cut from `main`; merge **only via PR** (never push to `main` directly).
+- Branch names: `feat|fix|chore|docs|ci/<slug>`. For feature work, the slug **matches `docs/work/<slug>/`**, one feature per branch.
+- **Merge is squash-only.** The PR title becomes the squash commit subject, so write **PR titles in Conventional Commits** form (`feat: …`). `main` stays "1 PR = 1 commit = buildable".
+- Before merging, confirm typecheck / tests / build are green (OS-dependent behavior — global hotkey, window control — verified on a real Tauri build, not the headless container).
+
 ## AI engineering team (subagents)
 
 This repo defines a 5-role AI team in `.claude/agents/` — `pm`, `designer`, `tech-lead`, `coder`, `qa` — driven through the phased process in `docs/ai-process.md`:
