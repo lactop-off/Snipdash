@@ -11,6 +11,7 @@ import {
   type RichMode,
   type Settings,
   type SpacerCard,
+  type TableCard,
   type TextCard,
   type TodoItem,
   DEFAULT_GRID,
@@ -103,6 +104,20 @@ export function createSpacerCard(layout: Partial<CardLayout> = {}): SpacerCard {
   };
 }
 
+/** A value-grid card. Starts as a small 2×2 table (one header row + one empty
+ * body row) the user fills in or pastes into. */
+export function createTableCard(layout: Partial<CardLayout> = {}): TableCard {
+  return {
+    id: newId(),
+    type: "table",
+    layout: { ...DEFAULT_LAYOUT, w: 5, h: 3, ...layout },
+    payload: {
+      headers: ["列1", "列2"],
+      rows: [["", ""]],
+    },
+  };
+}
+
 export function createBoard(name: string, order: number): Board {
   return {
     id: newId(),
@@ -133,5 +148,19 @@ export function copyableText(card: Card): string | null {
     case "spacer":
       // A spacer/heading is decorative, not a snippet to copy.
       return null;
+    case "table":
+      // Tables are copied per-cell (click a cell), not as a whole card.
+      return null;
   }
+}
+
+/** Normalize a table's rows to exactly `headers.length` columns (pad with empty
+ * strings, truncate extras) so rendering and editing never go ragged. */
+export function normalizeTableRows(headers: string[], rows: string[][]): string[][] {
+  const cols = headers.length;
+  return rows.map((row) => {
+    const next = row.slice(0, cols);
+    while (next.length < cols) next.push("");
+    return next;
+  });
 }

@@ -4,6 +4,7 @@ import {
   collectDueItems,
   createRichCard,
   createSpacerCard,
+  createTableCard,
   createTextCard,
   dueCount,
 } from "@snipdash/sdk";
@@ -77,6 +78,7 @@ export function AppShell() {
       { id: "add-markdown", title: t("cmd.addMarkdown"), icon: "file-text", keywords: "markdown md 追加", run: () => addAndEdit(() => createRichCard("markdown")) },
       { id: "add-code", title: t("cmd.addCode"), icon: "code", keywords: "code コード 追加", run: () => addAndEdit(() => createRichCard("code")) },
       { id: "add-todo", title: t("cmd.addTodo"), icon: "list-todo", keywords: "todo task タスク 追加", run: () => addAndEdit(() => createRichCard("todo")) },
+      { id: "add-table", title: t("cmd.addTable"), icon: "table", keywords: "table grid テーブル 表 追加", run: () => addAndEdit(() => createTableCard()) },
     ];
   }, [t, toggleMode, setMode, addCard]);
 
@@ -187,6 +189,9 @@ export function AppShell() {
                 </li>
                 <li>
                   <button type="button" onClick={() => add(() => createRichCard("todo"))}>{t("card.addTodo")}</button>
+                </li>
+                <li>
+                  <button type="button" onClick={() => add(() => createTableCard())}>{t("card.addTable")}</button>
                 </li>
                 <li>
                   <button type="button" onClick={() => add(() => createSpacerCard())}>{t("card.addSpacer")}</button>

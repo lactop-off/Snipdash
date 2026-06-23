@@ -119,6 +119,9 @@ pub enum Card {
     /// Body-only card with no title chrome. Empty text = a layout spacer;
     /// non-empty text renders as a centered heading/caption.
     Spacer(SpacerCard),
+    /// A grid of string cells. In use mode, clicking a body cell copies it
+    /// (with template-variable expansion); there are no per-cell buttons.
+    Table(TableCard),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -249,12 +252,36 @@ pub struct SpacerPayload {
     pub text: String,
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TableCard {
+    pub id: String,
+    pub layout: CardLayout,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color_tag: Option<String>,
+    pub payload: TablePayload,
+}
+
+/// A simple value grid. `headers` defines the columns (always shown as a fixed
+/// header row); `rows` holds the body cell values. Rows are normalized to the
+/// header count by the frontend; cells may contain template variables that are
+/// expanded on copy.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TablePayload {
+    pub headers: Vec<String>,
+    pub rows: Vec<Vec<String>>,
+}
+
 impl Card {
     pub fn id(&self) -> &str {
         match self {
             Card::Text(c) => &c.id,
             Card::Rich(c) => &c.id,
             Card::Spacer(c) => &c.id,
+            Card::Table(c) => &c.id,
         }
     }
 
@@ -263,6 +290,7 @@ impl Card {
             Card::Text(c) => &c.layout,
             Card::Rich(c) => &c.layout,
             Card::Spacer(c) => &c.layout,
+            Card::Table(c) => &c.layout,
         }
     }
 
@@ -271,6 +299,7 @@ impl Card {
             Card::Text(_) => "text",
             Card::Rich(_) => "rich",
             Card::Spacer(_) => "spacer",
+            Card::Table(_) => "table",
         }
     }
 }
