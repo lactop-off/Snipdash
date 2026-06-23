@@ -26,13 +26,20 @@ pnpm install
 
 **設計原則**: フロントは OS リソース（ファイル/クリップボード/起動）に**直接触れず**、必ず Tauri コマンド経由でアクセスします。ドメイン検証は `snipdash-core` に集約します。
 
-## ワークフロー
+## ブランチ運用 — GitHub Flow（トランクベース）
+
+- **トランク = `main`**。常にビルド可能・リリース可能な状態を保つ。`main` への直接 push はせず、必ず PR 経由でマージする。
+- 作業は **`main` から切った短命ブランチ**で行う。1つのまとまり（1機能／1修正）ごとに PR を出し、マージ後にブランチを削除する（マージ時に自動削除）。
+- **ブランチ名**は `<type>/<slug>` 形式：`feat/` 新機能・`fix/` 修正・`chore/` 雑務・`docs/` ドキュメント・`ci/` CI。
+- AI チームの機能開発では **slug を `docs/work/<slug>/` と一致**させる（例：`feat/today-view` ↔ `docs/work/today-view/`）。**1ブランチ＝1機能**を原則とし、複数機能を盛り合わせない。
+
+### 手順
 
 1. Issue を立てる、または `good first issue` から選ぶ
-2. ブランチを切る（例: `feat/launcher-card`）
+2. `main` から `feat/<slug>` などのブランチを切る
 3. 変更を加え、テストを追加/更新する
-4. ローカルでテストを通す（下記）
-5. Pull Request を送る
+4. ローカルでテスト・型チェック・ビルドを通す（下記）
+5. Pull Request を送る（タイトルは Conventional Commits 形式）
 
 ## テスト
 
@@ -52,9 +59,17 @@ pnpm typecheck
 
 ## コミット / PR
 
-- コミットメッセージは簡潔かつ説明的に（日本語/英語どちらでも可）。
-- 1 PR = 1 つの論理的な変更を心がけてください。
+- **Conventional Commits**（`feat:` `fix:` `docs:` `chore:` `ci:` …）。本文は日本語/英語どちらでも可、識別子・コメントは英語（`CLAUDE.md` 準拠）。
+- **マージは squash 専用**（merge commit / rebase merge は無効）。PR 内の WIP コミットは1つに圧縮され、`main` は常に「1 PR = 1 コミット = ビルド可能」を保つ。
+- **squash コミットの件名 = PR タイトル**。したがって **PR タイトルを Conventional Commits 形式**にする。
+- 1 PR = 1 つの論理的な変更に絞る。
+- マージ条件: PR 必須・CI があれば緑。ソロ運用ではレビュー承認は任意（self-merge 可）。複数人になればレビュー必須化を検討。
+- **OS 依存の挙動**（グローバルホットキー・ウィンドウ制御など）は **Tauri 実機**（`pnpm tauri dev`）で確認する（ヘッドレス環境では `cargo check -p snipdash-desktop` まで）。
 - セキュリティに関わる変更（起動対象の検証、Capability など）は、根拠を PR 説明に明記してください。
+
+## リリース（将来）
+
+- `main` に `vX.Y.Z` タグを打ち、`pnpm tauri build` の成果物を GitHub Release に添付する。
 
 ## ライセンス
 

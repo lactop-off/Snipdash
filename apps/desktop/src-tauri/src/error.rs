@@ -21,6 +21,7 @@ pub enum ErrorCode {
     InvalidTarget,
     Clipboard,
     Open,
+    #[allow(dead_code)] // only constructed on non-desktop platforms
     Unsupported,
     Internal,
 }
@@ -44,6 +45,9 @@ impl AppError {
         Self::new(ErrorCode::InvalidTarget, message)
     }
 
+    // Emitted only on platforms without global shortcuts (non-desktop); unused
+    // on desktop builds, so allow dead_code there.
+    #[allow(dead_code)]
     pub fn unsupported(message: impl Into<String>) -> Self {
         Self::new(ErrorCode::Unsupported, message)
     }

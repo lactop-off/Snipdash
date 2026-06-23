@@ -14,7 +14,7 @@ export function RichCard({ card, edit }: { card: RichCardType; edit: boolean }) 
         <TodoView
           card={card}
           items={card.payload.items}
-          hideCompleted={card.payload.hideCompleted ?? false}
+          hideCompleted={card.payload.hideCompleted ?? true}
           edit={edit}
         />
       );

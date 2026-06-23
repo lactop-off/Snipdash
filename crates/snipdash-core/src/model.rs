@@ -30,6 +30,25 @@ pub struct Settings {
     pub global_hotkey: Option<String>,
     pub active_board_id: String,
     pub locale: Locale,
+    /// Default reminder lead time (minutes) for todo items that don't set their
+    /// own `remind_before`. `None` lets the frontend apply its built-in default.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_remind_before: Option<u32>,
+    /// Pomodoro durations (minutes) + long-break interval. `None` lets the
+    /// frontend apply its built-in defaults. The running timer is ephemeral.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pomodoro: Option<PomodoroConfig>,
+}
+
+/// Pomodoro timer configuration (persisted; the running state is not).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PomodoroConfig {
+    pub work_min: u32,
+    pub break_min: u32,
+    pub long_break_min: u32,
+    /// Take a long break after this many completed work intervals.
+    pub long_break_every: u32,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -97,6 +116,9 @@ pub struct CardLayout {
 pub enum Card {
     Text(TextCard),
     Rich(RichCard),
+    /// Body-only card with no title chrome. Empty text = a layout spacer;
+    /// non-empty text renders as a centered heading/caption.
+    Spacer(SpacerCard),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -190,6 +212,41 @@ pub struct TodoItem {
     pub id: String,
     pub text: String,
     pub done: bool,
+    /// Optional due date/time as an ISO 8601 string (with timezone offset). The
+    /// frontend schedules a reminder ahead of this instant.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub due: Option<String>,
+    /// Minutes before `due` to fire the reminder. `None` falls back to the
+    /// workspace-level `default_remind_before`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remind_before: Option<u32>,
+    /// ISO timestamp of the last reminder fired for this item, used to avoid
+    /// re-notifying on app restart. The frontend clears it when `due` changes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub notified_at: Option<String>,
+}
+
+/// A body-only card. Structurally it carries the same optional `label`/`color_tag`
+/// as other cards (for a uniform `Card` shape) but the UI never exposes them —
+/// only the centered `payload.text` is rendered.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SpacerCard {
+    pub id: String,
+    pub layout: CardLayout,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color_tag: Option<String>,
+    pub payload: SpacerPayload,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SpacerPayload {
+    /// Body text. Empty = a layout spacer; non-empty renders as a centered
+    /// heading/caption.
+    pub text: String,
 }
 
 impl Card {
@@ -197,6 +254,7 @@ impl Card {
         match self {
             Card::Text(c) => &c.id,
             Card::Rich(c) => &c.id,
+            Card::Spacer(c) => &c.id,
         }
     }
 
@@ -204,6 +262,7 @@ impl Card {
         match self {
             Card::Text(c) => &c.layout,
             Card::Rich(c) => &c.layout,
+            Card::Spacer(c) => &c.layout,
         }
     }
 
@@ -211,6 +270,7 @@ impl Card {
         match self {
             Card::Text(_) => "text",
             Card::Rich(_) => "rich",
+            Card::Spacer(_) => "spacer",
         }
     }
 }

@@ -12,7 +12,8 @@ Snipdash は、メモ帳の軽さと Notion のブロック表現の中間に位
 - 🔒 **完全ローカル・軽量** — Tauri 製。データはプレーンな JSON。テレメトリ無し
 - 🌓 **ライト/ダークテーマ**・日本語/英語
 
-> ステータス: **v1 開発中**。詳細仕様は [`docs/spec.md`](docs/spec.md) を参照してください。
+> ステータス: **v1 開発中**。詳細仕様は [`docs/仕様書.md`](docs/仕様書.md) を参照してください。
+> はじめての方は [`docs/システム説明書.md`](docs/システム説明書.md) から読むのがおすすめです（機能・使い方・構成を一通り解説）。
 
 ---
 
@@ -36,7 +37,7 @@ snipdash/
 │  └─ snipdash-core/      # ★再利用可能な Rust クレート（ドメイン型・検証・直列化・マイグレーション）
 ├─ packages/
 │  └─ snipdash-sdk/       # ★TS SDK（型定義・invoke ラッパ・resolveTemplate）
-├─ docs/spec.md           # 仕様書（要件定義 → 詳細設計）
+├─ docs/仕様書.md           # 仕様書（要件定義 → 詳細設計）
 ├─ LICENSE                # MIT
 └─ README.md
 ```
@@ -62,7 +63,7 @@ snipdash/
 pnpm install
 ```
 
-> 🐳 **Docker で開発したい場合** は [`docs/docker.md`](docs/docker.md) を参照してください。テスト・型チェック・ブラウザでの UI 開発・Linux 配布物ビルドをコンテナ内で完結できます（`pnpm docker:build && pnpm docker:up && pnpm docker:sh`）。
+> 🐳 **Docker で開発したい場合** は [`docs/Docker開発環境.md`](docs/Docker開発環境.md) を参照してください。テスト・型チェック・ブラウザでの UI 開発・Linux 配布物ビルドをコンテナ内で完結できます（`pnpm docker:build && pnpm docker:up && pnpm docker:sh`）。
 
 ### よく使うコマンド
 

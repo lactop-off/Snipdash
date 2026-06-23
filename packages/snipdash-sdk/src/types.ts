@@ -41,6 +41,14 @@ export interface TodoItem {
   id: string;
   text: string;
   done: boolean;
+  /** Optional due date/time as an ISO 8601 string (with timezone offset). */
+  due?: string;
+  /** Minutes before `due` to fire a reminder. Undefined falls back to
+   * `Settings.defaultRemindBefore` (and then `DEFAULT_REMIND_BEFORE`). */
+  remindBefore?: number;
+  /** ISO timestamp of the last reminder fired, used to dedupe across restarts.
+   * Cleared whenever `due` changes. */
+  notifiedAt?: string;
 }
 
 export type RichPayload =
@@ -57,10 +65,19 @@ interface CardBase {
   colorTag?: string;
 }
 
+/** Body-only card: empty `text` is a layout spacer, non-empty renders as a
+ * centered heading/caption. It has no title/label chrome in the UI (the
+ * optional `label`/`colorTag` from `CardBase` are kept only for a uniform card
+ * shape and are never shown). */
+export interface SpacerPayload {
+  text: string;
+}
+
 export type TextCard = CardBase & { type: "text"; payload: TextPayload };
 export type RichCard = CardBase & { type: "rich"; payload: RichPayload };
+export type SpacerCard = CardBase & { type: "spacer"; payload: SpacerPayload };
 
-export type Card = TextCard | RichCard;
+export type Card = TextCard | RichCard | SpacerCard;
 export type CardType = Card["type"];
 
 export interface Board {
@@ -79,7 +96,37 @@ export interface Settings {
   globalHotkey?: string;
   activeBoardId: string;
   locale: Locale;
+  /** Default reminder lead time (minutes) for todo items without their own
+   * `remindBefore`. Undefined applies `DEFAULT_REMIND_BEFORE`. */
+  defaultRemindBefore?: number;
+  /** Pomodoro durations (minutes) + long-break interval. Undefined applies
+   * `DEFAULT_POMODORO`. The running timer state is ephemeral and not stored. */
+  pomodoro?: PomodoroConfig;
 }
+
+/** Pomodoro timer configuration (persisted). */
+export interface PomodoroConfig {
+  workMin: number;
+  breakMin: number;
+  longBreakMin: number;
+  /** Take a long break after this many completed work intervals. */
+  longBreakEvery: number;
+}
+
+/** Built-in fallback reminder lead time (minutes) when neither the item nor the
+ * workspace settings specify one. Must be one of {@link REMIND_BEFORE_PRESETS}. */
+export const DEFAULT_REMIND_BEFORE = 15;
+
+/** Lead-time presets offered in the todo due-date picker, in minutes. */
+export const REMIND_BEFORE_PRESETS = [0, 5, 15, 30, 60, 120, 1440] as const;
+
+/** Classic Pomodoro defaults applied when `Settings.pomodoro` is unset. */
+export const DEFAULT_POMODORO: PomodoroConfig = {
+  workMin: 25,
+  breakMin: 5,
+  longBreakMin: 15,
+  longBreakEvery: 4,
+};
 
 export interface Workspace {
   schemaVersion: number;

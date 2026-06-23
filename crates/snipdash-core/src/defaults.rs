@@ -39,6 +39,9 @@ fn todo_item(text: &str, done: bool) -> TodoItem {
         id: uuid(),
         text: text.to_string(),
         done,
+        due: None,
+        remind_before: None,
+        notified_at: None,
     }
 }
 
@@ -79,7 +82,7 @@ pub fn default_workspace() -> Workspace {
                         todo_item("日報の作成", false),
                         todo_item("ミーティング", true),
                     ],
-                    hide_completed: false,
+                    hide_completed: true,
                 },
             ),
         ],
@@ -178,6 +181,8 @@ pub fn default_workspace() -> Workspace {
             global_hotkey: None,
             active_board_id,
             locale: Locale::Ja,
+            default_remind_before: None,
+            pomodoro: None,
         },
         boards: vec![board_biz, board_dev, board_links],
     }

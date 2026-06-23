@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useStore } from "./store";
 import { applyTheme } from "./theme";
+import { initNotifications } from "./notify";
+import { startReminderScheduler } from "./reminders";
 import { AppShell } from "./components/AppShell";
 import { ToastView } from "./components/ToastView";
 
@@ -16,6 +18,14 @@ export default function App() {
   useEffect(() => {
     if (theme) applyTheme(theme);
   }, [theme]);
+
+  // Reminder delivery: ask for OS notification permission once the workspace is
+  // loaded, then run the periodic due-date sweep for its lifetime.
+  useEffect(() => {
+    if (!loaded) return;
+    void initNotifications();
+    return startReminderScheduler();
+  }, [loaded]);
 
   return (
     <>

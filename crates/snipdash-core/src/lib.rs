@@ -66,6 +66,24 @@ mod tests {
     }
 
     #[test]
+    fn pomodoro_config_roundtrips() {
+        let mut ws = default_workspace();
+        ws.settings.pomodoro = Some(PomodoroConfig {
+            work_min: 50,
+            break_min: 10,
+            long_break_min: 20,
+            long_break_every: 3,
+        });
+        let json = to_pretty_json(&ws).unwrap();
+        // camelCase keys on the wire
+        assert!(json.contains("\"workMin\""));
+        assert!(json.contains("\"longBreakEvery\""));
+        let back = load_from_str(&json).unwrap();
+        assert_eq!(ws, back);
+        assert_eq!(back.settings.pomodoro.unwrap().work_min, 50);
+    }
+
+    #[test]
     fn unknown_fields_are_ignored_for_forward_compat() {
         let json = r#"{
             "schemaVersion": 1,
@@ -155,6 +173,32 @@ mod tests {
             },
         });
         assert!(validate_card(&card, &grid).is_err());
+    }
+
+    #[test]
+    fn spacer_card_roundtrips() {
+        // A spacer with empty text serializes its `type` tag and survives a
+        // load/save round-trip (empty text is valid — that's the spacer case).
+        let card = Card::Spacer(SpacerCard {
+            id: "s1".into(),
+            layout: CardLayout { x: 0, y: 0, w: 4, h: 2 },
+            label: None,
+            color_tag: None,
+            payload: SpacerPayload { text: String::new() },
+        });
+        assert!(validate_card(&card, &GridConfig::default()).is_ok());
+
+        let json = serde_json::to_value(&card).unwrap();
+        assert_eq!(json["type"], "spacer");
+        assert_eq!(json["payload"]["text"], "");
+        // A filled spacer round-trips its text back.
+        let filled: Card = serde_json::from_value(serde_json::json!({
+            "type": "spacer", "id": "s2",
+            "layout": {"x":0,"y":0,"w":6,"h":2},
+            "payload": {"text": "セクション見出し"}
+        }))
+        .unwrap();
+        assert_eq!(filled.type_name(), "spacer");
     }
 
     #[test]

@@ -9,3 +9,5 @@ export * from "./types";
 export * from "./template";
 export * from "./commands";
 export * from "./factory";
+export * from "./today";
+export * from "./search";
