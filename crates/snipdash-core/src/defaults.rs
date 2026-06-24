@@ -34,6 +34,30 @@ fn rich_card(x: u32, y: u32, w: u32, h: u32, label: &str, payload: RichPayload) 
     })
 }
 
+fn table_card(
+    x: u32,
+    y: u32,
+    w: u32,
+    h: u32,
+    label: &str,
+    headers: &[&str],
+    rows: &[&[&str]],
+) -> Card {
+    Card::Table(TableCard {
+        id: uuid(),
+        layout: CardLayout { x, y, w, h },
+        label: Some(label.to_string()),
+        color_tag: None,
+        payload: TablePayload {
+            headers: headers.iter().map(|s| s.to_string()).collect(),
+            rows: rows
+                .iter()
+                .map(|r| r.iter().map(|s| s.to_string()).collect())
+                .collect(),
+        },
+    })
+}
+
 fn todo_item(text: &str, done: bool) -> TodoItem {
     TodoItem {
         id: uuid(),
@@ -124,6 +148,19 @@ pub fn default_workspace() -> Workspace {
                     source: "`~/projects`".to_string(),
                     collapsed: vec![],
                 },
+            ),
+            table_card(
+                0,
+                6,
+                7,
+                4,
+                "接続先一覧（セルをクリックでコピー）",
+                &["環境", "ホスト", "ユーザー"],
+                &[
+                    &["本番", "db.prod.example:5432", "app_ro"],
+                    &["検証", "db.stg.example:5432", "app_rw"],
+                    &["ローカル", "localhost:5432", "postgres"],
+                ],
             ),
         ],
     };

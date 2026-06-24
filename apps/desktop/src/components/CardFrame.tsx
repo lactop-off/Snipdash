@@ -7,6 +7,7 @@ import { ColorPicker, colorValue } from "./ColorPicker";
 import { Icon } from "./Icon";
 import { TextCard } from "./TextCard";
 import { RichCard } from "./RichCard";
+import { TableCard } from "./TableCard";
 
 function CardBody({ card, edit }: { card: Card; edit: boolean }) {
   switch (card.type) {
@@ -14,6 +15,8 @@ function CardBody({ card, edit }: { card: Card; edit: boolean }) {
       return <TextCard card={card} edit={edit} />;
     case "rich":
       return <RichCard card={card} edit={edit} />;
+    case "table":
+      return <TableCard card={card} edit={edit} />;
     case "spacer":
       // Spacer cards are rendered outside CardFrame (see GridCanvas); this arm
       // only keeps the switch exhaustive.

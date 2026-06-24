@@ -55,6 +55,7 @@ mod tests {
         let json = to_pretty_json(&ws).unwrap();
         assert!(json.contains("\"type\": \"text\""));
         assert!(json.contains("\"type\": \"rich\""));
+        assert!(json.contains("\"type\": \"table\""));
         // rich sub-mode tag
         assert!(json.contains("\"mode\": \"markdown\""));
         assert!(json.contains("\"mode\": \"code\""));
@@ -63,6 +64,39 @@ mod tests {
         assert!(json.contains("\"schemaVersion\""));
         assert!(json.contains("\"copyFormat\""));
         assert!(json.contains("\"activeBoardId\""));
+    }
+
+    #[test]
+    fn table_card_requires_at_least_one_column() {
+        let grid = GridConfig::default();
+        let card = Card::Table(TableCard {
+            id: "t1".into(),
+            layout: CardLayout { x: 0, y: 0, w: 4, h: 3 },
+            label: None,
+            color_tag: None,
+            payload: TablePayload {
+                headers: vec![],
+                rows: vec![],
+            },
+        });
+        assert!(validate_card(&card, &grid).is_err());
+    }
+
+    #[test]
+    fn table_card_roundtrips() {
+        let card = Card::Table(TableCard {
+            id: "t1".into(),
+            layout: CardLayout { x: 0, y: 0, w: 4, h: 3 },
+            label: Some("env".into()),
+            color_tag: None,
+            payload: TablePayload {
+                headers: vec!["a".into(), "b".into()],
+                rows: vec![vec!["1".into(), "2".into()]],
+            },
+        });
+        let json = serde_json::to_string(&card).unwrap();
+        let back: Card = serde_json::from_str(&json).unwrap();
+        assert_eq!(card, back);
     }
 
     #[test]

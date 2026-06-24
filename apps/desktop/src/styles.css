@@ -1597,3 +1597,143 @@ button.todo-due-pill:hover {
   font-size: 12px;
   color: var(--muted);
 }
+
+/* ---------- Table card ---------- */
+.table-card {
+  padding: 6px;
+  gap: 6px;
+}
+.table-scroll {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+.snip-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+.snip-table th,
+.snip-table td {
+  border: 1px solid var(--border);
+  padding: 0;
+  text-align: left;
+  vertical-align: middle;
+}
+.snip-table thead th {
+  background: var(--panel-2);
+  font-weight: 600;
+  padding: 5px 8px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+/* Use mode: clickable body cells */
+.snip-table td.cell {
+  position: relative;
+  padding: 5px 22px 5px 8px;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.snip-table td.cell.is-copyable {
+  cursor: pointer;
+}
+.snip-table td.cell.is-copyable:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.snip-table td.cell .cell-copy {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  pointer-events: none;
+}
+.snip-table td.cell.is-copyable:hover .cell-copy {
+  opacity: 0.8;
+}
+.snip-table td.cell.is-empty {
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 5px,
+    var(--panel-2) 5px,
+    var(--panel-2) 6px
+  );
+}
+/* brief flash after a successful copy */
+.snip-table td.cell.flash {
+  animation: cell-flash 0.4s ease;
+}
+@keyframes cell-flash {
+  0% {
+    background: var(--accent);
+    color: var(--accent-contrast);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+/* Edit mode: inline inputs + row/column controls */
+.snip-table.is-edit td,
+.snip-table.is-edit th {
+  padding: 0;
+}
+.snip-table .cell-input {
+  width: 100%;
+  min-width: 70px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  padding: 5px 7px;
+  font: inherit;
+}
+.snip-table .cell-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  background: var(--panel);
+}
+.snip-table .th-edit {
+  display: flex;
+  align-items: center;
+  background: var(--panel-2);
+}
+.snip-table .th-edit .cell-input {
+  font-weight: 600;
+}
+.snip-table .col-del,
+.snip-table .row-del {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 0 5px;
+  line-height: 1;
+  font-size: 13px;
+}
+.snip-table .col-del:hover,
+.snip-table .row-del:hover {
+  color: var(--danger);
+}
+.snip-table .add-col-cell,
+.snip-table .row-del-cell {
+  border: 1px solid var(--border);
+  text-align: center;
+  background: var(--panel-2);
+  width: 1%;
+  white-space: nowrap;
+}
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.table-hint {
+  font-size: 11px;
+}

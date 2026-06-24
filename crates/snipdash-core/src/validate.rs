@@ -110,6 +110,15 @@ pub fn validate_card(card: &Card, grid: &GridConfig) -> CoreResult<()> {
         )));
     }
 
+    if let Card::Table(c) = card {
+        if c.payload.headers.is_empty() {
+            return Err(err(format!(
+                "table card '{}' must have at least one column",
+                card.id()
+            )));
+        }
+    }
+
     Ok(())
 }
 

@@ -11,7 +11,7 @@ export type Hit =
       id: string;
       boardId: string;
       boardName: string;
-      cardType: "text" | "markdown" | "code" | "todo" | "spacer";
+      cardType: "text" | "markdown" | "code" | "todo" | "spacer" | "table";
       title: string;
       copyable: boolean;
       copyText: string;
@@ -43,15 +43,19 @@ export function fuzzyScore(text: string, query: string): number | null {
   return score;
 }
 
-function cardType(card: Card): "text" | "markdown" | "code" | "todo" | "spacer" {
+function cardType(card: Card): "text" | "markdown" | "code" | "todo" | "spacer" | "table" {
   if (card.type === "text") return "text";
   if (card.type === "spacer") return "spacer";
+  if (card.type === "table") return "table";
   return card.payload.mode;
 }
 
 function cardBody(card: Card): string {
   if (card.type === "text") return card.payload.body;
   if (card.type === "spacer") return card.payload.text;
+  if (card.type === "table") {
+    return [card.payload.headers, ...card.payload.rows].map((r) => r.join("\t")).join("\n");
+  }
   switch (card.payload.mode) {
     case "markdown":
     case "code":

@@ -73,11 +73,21 @@ export interface SpacerPayload {
   text: string;
 }
 
+/** A value grid. `headers` defines the columns (always shown as a fixed header
+ * row); `rows` holds the body cell values, normalized to `headers.length`.
+ * In use mode, clicking a body cell copies it (with template-variable
+ * expansion) — there are no per-cell buttons. */
+export interface TablePayload {
+  headers: string[];
+  rows: string[][];
+}
+
 export type TextCard = CardBase & { type: "text"; payload: TextPayload };
 export type RichCard = CardBase & { type: "rich"; payload: RichPayload };
 export type SpacerCard = CardBase & { type: "spacer"; payload: SpacerPayload };
+export type TableCard = CardBase & { type: "table"; payload: TablePayload };
 
-export type Card = TextCard | RichCard | SpacerCard;
+export type Card = TextCard | RichCard | SpacerCard | TableCard;
 export type CardType = Card["type"];
 
 export interface Board {

@@ -3,6 +3,7 @@ import {
   createBoard,
   createTextCard,
   createRichCard,
+  createTableCard,
   createTodoItem,
 } from "@snipdash/sdk";
 
@@ -41,7 +42,17 @@ export function sampleWorkspace(): Workspace {
     code.payload.language = "bash";
     code.payload.source = "git log --oneline -10\ngit switch -c feat/{{DAY}}-task";
   }
-  dev.cards = [code];
+  const table = createTableCard({ x: 0, y: 6, w: 7, h: 4 });
+  table.label = "接続先一覧（セルをクリックでコピー）";
+  table.payload = {
+    headers: ["環境", "ホスト", "ユーザー"],
+    rows: [
+      ["本番", "db.prod.example:5432", "app_ro"],
+      ["検証", "db.stg.example:5432", "app_rw"],
+      ["ローカル", "localhost:5432", "postgres"],
+    ],
+  };
+  dev.cards = [code, table];
 
   const links = createBoard("リンク集", 2);
   links.colorTag = "purple";
